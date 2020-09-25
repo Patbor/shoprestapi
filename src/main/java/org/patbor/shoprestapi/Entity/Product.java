@@ -24,7 +24,6 @@ public class Product {
 
     private String description;
 
-
     @Column(name = "value_netto")
     private BigDecimal valueNetto;
 

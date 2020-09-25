@@ -22,11 +22,11 @@ public class TransactionDetail {
 
     @ManyToOne
     @JoinColumn(name = "transaction_id")
-    private Transaction transactions;
+    private Transaction transaction;
 
     @ManyToOne
     @JoinColumn(name = "product_id")
-    private Product products;
+    private Product product;
 
     private int amount;
 
@@ -36,6 +36,11 @@ public class TransactionDetail {
     @Column(name = "value_brutto")
     private BigDecimal valueBrutto;
 
-
+    public TransactionDetail(Product product, int amount,  BigDecimal valueNetto, BigDecimal valueBrutto) {
+        this.product = product;
+        this.amount = amount;
+        this.valueBrutto = valueBrutto;
+        this.valueNetto = valueNetto;
+    }
 
 }
