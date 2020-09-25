@@ -34,17 +34,4 @@ public class Product {
     @Column(name = "available_count")
     private int availableCount;
 
-    @OneToMany(mappedBy = "products")
-    private List<TransactionDetail> transactionDetails;
-
-    public void addDetails(TransactionDetail transactionDetail) {
-
-        if(transactionDetails == null) {
-            transactionDetails = new ArrayList<>();
-        }
-        if(transactionDetail != null) {
-            transactionDetails.add(transactionDetail);
-        }
-        transactionDetail.setProducts(this);
-    }
 }

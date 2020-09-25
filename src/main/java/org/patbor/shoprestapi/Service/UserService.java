@@ -39,4 +39,14 @@ public class UserService {
         return userRepository.findAll();
     }
 
+    public User findUserByID(int id) {
+        Optional<User> OptUser = userRepository.findById(id);
+        User user;
+        if (OptUser.isPresent()) {
+            user = OptUser.get();
+        } else {
+            throw new RuntimeException("Customer with id " + id + " doesn't exists");
+        }
+        return user;
+    }
 }

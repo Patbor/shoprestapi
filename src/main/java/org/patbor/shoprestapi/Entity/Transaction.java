@@ -23,8 +23,9 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int transactionID;
 
+
+
     @ManyToOne(cascade = {CascadeType.PERSIST,CascadeType.MERGE,CascadeType.DETACH,CascadeType.REFRESH})
-    @Column(name = "user_id")
     @JoinColumn(name = "user_id")
     private User user;
 

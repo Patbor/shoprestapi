@@ -20,6 +20,7 @@ public class ProductController {
 
     @GetMapping
     public List<Product> showProducts() {
+
         return productService.showProducts();
     }
 
