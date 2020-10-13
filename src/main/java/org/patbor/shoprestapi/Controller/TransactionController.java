@@ -11,10 +11,12 @@ import org.patbor.shoprestapi.Service.TransactionService;
 import org.patbor.shoprestapi.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +28,7 @@ public class TransactionController {
     private ProductService productService;
     private UserService userService;
     List<Order> orders = new ArrayList<>();
+
     @Autowired
     public TransactionController(TransactionService transactionService,
                                  TransactionDetailsService transactionDetailsService,
@@ -57,15 +60,15 @@ public class TransactionController {
     @PostMapping("/shopping/finalize/{userID}")
     public void finalizeTransaction(@PathVariable int userID) {
         Value value = values();
-        Transaction transaction = new Transaction(userService.findUserByID(userID), 
+        Transaction transaction = new Transaction(userService.findUserByID(userID),
                 value.getValueBrutto(),
-                value.getValueNetto(), 
+                value.getValueNetto(),
                 LocalDate.now());
         transactionService.addTransaction(transaction);
         for (Order order : orders) {
             Product product = order.getProduct();
             TransactionDetail transactionDetail = new TransactionDetail(product, order.getAmount(), product.getValueNetto(), product.getValueBrutto());
-           
+
             transaction.addDetails(transactionDetail);
             transactionDetailsService.addTransactionDetail(transactionDetail);
         }
@@ -74,14 +77,14 @@ public class TransactionController {
     private Value values() {
         Value value = new Value();
 
-        for (Order order: orders) {
+        for (Order order : orders) {
             BigDecimal actualValueBrutto = value.getValueBrutto();
             BigDecimal actualValueNetto = value.getValueNetto();
             int amount = order.getAmount();
 
             value.setValueBrutto(actualValueBrutto
                     .add((order.getProduct().getValueBrutto())
-                    .multiply(BigDecimal.valueOf(amount))));
+                            .multiply(BigDecimal.valueOf(amount))));
 
             value.setValueNetto(actualValueNetto
                     .add((order.getProduct().getValueNetto()))
@@ -89,5 +92,29 @@ public class TransactionController {
         }
 
         return value;
+    }
+
+//    @GetMapping("/find/{from},{to}")
+//    public List<Transaction> findTransaction(@PathVariable("from") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate from,
+//                                             @PathVariable("to") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate to) {
+//        return transactionService.findAllTransactionByDate(from, to);
+//    }
+    @GetMapping("/find/{from},{to}")
+    public List<Transaction> findTransaction(@PathVariable String from,
+                                             @PathVariable String to) {
+        return transactionService.findAllTransactionByDate(dataFormatter(from),dataFormatter(to));
+
+    }
+
+    @GetMapping("/find/{from}")
+    public List<Transaction> findTransaction(@PathVariable("from") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate from) {
+        return transactionService.findAllTransactionByDate(from);
+
+    }
+
+    private LocalDate dataFormatter(String date) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate localDate = LocalDate.parse(date, formatter);
+        return localDate;
     }
 }
