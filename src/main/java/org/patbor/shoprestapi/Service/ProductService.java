@@ -20,7 +20,7 @@ public class ProductService {
 
     public void addProduct(Product product) {
         if (productRepository.findProductByName(product.getName()) != null)
-            throw new RuntimeException("Product has already exists");
+            throw new RuntimeException("Product have already existed");
         else
             productRepository.save(product);
     }
@@ -33,7 +33,7 @@ public class ProductService {
     public Product findProductByName(String name) {
         Product product = productRepository.findProductByName(convertFirstLetterToCapitolLetter(name));
         if (product == null)
-            throw new RuntimeException("A product with that name doesn't exist");
+            throw new RuntimeException("A product with that name don't exist");
         else
 
             return product;

@@ -21,8 +21,8 @@ import java.util.List;
 public class Transaction {
 
     @Id
-    @Column(name = "transaction_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "transaction_id")
     private int transactionID;
 
     @ManyToOne(cascade = {CascadeType.PERSIST,CascadeType.MERGE,CascadeType.DETACH,CascadeType.REFRESH})
@@ -35,7 +35,7 @@ public class Transaction {
     @Column(name = "value_brutto")
     private BigDecimal valueBrutto;
 
-    @OneToMany(mappedBy = "transaction")
+    @OneToMany(mappedBy = "transaction", cascade = {CascadeType.MERGE,CascadeType.DETACH,CascadeType.REFRESH} )
     @JsonIgnore
     private List<TransactionDetail> transactionDetails;
 
@@ -57,7 +57,6 @@ public class Transaction {
             transactionDetails.add(transactionDetail);
         }
         transactionDetail.setTransaction(this);
-
     }
 
 

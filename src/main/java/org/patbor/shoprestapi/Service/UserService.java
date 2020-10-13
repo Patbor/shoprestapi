@@ -31,7 +31,7 @@ public class UserService {
             User user = tempUser.get();
             userRepository.delete(user);
         } else {
-            throw new RuntimeException("Customer with id " + id + " doesn't exists");
+            throw new RuntimeException("Customer with id " + id + " don't exists");
         }
     }
 
@@ -45,7 +45,7 @@ public class UserService {
         if (OptUser.isPresent()) {
             user = OptUser.get();
         } else {
-            throw new RuntimeException("Customer with id " + id + " doesn't exists");
+            throw new RuntimeException("Customer with id " + id + " don't exists");
         }
         return user;
     }

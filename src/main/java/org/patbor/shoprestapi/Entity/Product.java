@@ -1,5 +1,6 @@
 package org.patbor.shoprestapi.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -33,4 +34,7 @@ public class Product {
     @Column(name = "available_count")
     private int availableCount;
 
+    @OneToMany(mappedBy = "product", cascade = {CascadeType.MERGE,CascadeType.DETACH,CascadeType.REFRESH})
+    @JsonIgnore
+    private List<TransactionDetail> transactionDetails;
 }
