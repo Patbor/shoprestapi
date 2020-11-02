@@ -2,8 +2,12 @@ package org.patbor.shoprestapi.Service;
 
 
 import org.patbor.shoprestapi.Entity.Product;
+import org.patbor.shoprestapi.Exceptions.AlreadyExistsException;
+import org.patbor.shoprestapi.Exceptions.NotFoundException;
 import org.patbor.shoprestapi.Repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,43 +22,45 @@ public class ProductService {
         this.productRepository = productRepository;
     }
 
-    public void addProduct(Product product) {
-        if (productRepository.findProductByName(product.getName()) != null)
-            throw new RuntimeException("Product has already existed");
-        else
-            productRepository.save(product);
+    public ResponseEntity<Product> addProduct(Product product) {
+        if (productRepository.findProductByName(product.getName()) != null) {
+            throw new AlreadyExistsException("Product has already existed");
+        }
+        else {
+            return new ResponseEntity<>(productRepository.save(product), HttpStatus.OK);
+        }
     }
 
-    public List<Product> showProducts() {
+    public ResponseEntity<List<Product>> showProducts() {
 
-        return productRepository.findAll();
+        return new ResponseEntity<>(productRepository.findAll(),HttpStatus.OK);
     }
 
-    public Product findProductByName(String name) {
+    public ResponseEntity<Product> findProductByName(String name) {
         Product product = productRepository.findProductByName(convertFirstLetterToCapitolLetter(name));
-        if (product == null)
-            throw new RuntimeException("A product with that name doesn't exist");
-        else
+        if (product == null) {
+            throw new NotFoundException("A product with name " + name + " doesn't exist");
+        } else {
+            return new ResponseEntity<>(product, HttpStatus.OK);
+        }
+    }
 
-            return product;
+    public ResponseEntity<Product> findProductById(int id) {
+        Optional<Product> OptProduct = productRepository.findById(id);
+        Product product = null;
+        if (OptProduct.isPresent()) {
+            product = OptProduct.get();
+        } else {
+            throw new NotFoundException("There is no product with id: " + id);
+        }
+        return new ResponseEntity<>(product, HttpStatus.OK);
     }
 
     private String convertFirstLetterToCapitolLetter(String name) {
-        String firstLetter = name.substring(0,1).toUpperCase();
+        String firstLetter = name.substring(0, 1).toUpperCase();
         String correctlyName = name.replace(name.charAt(0), firstLetter.toCharArray()[0]);
 
         return correctlyName;
 
-    }
-
-    public Product findProductById(int id) {
-       Optional<Product> OptProduct = productRepository.findById(id);
-        Product product = null;
-       if(OptProduct.isPresent()) {
-           product = OptProduct.get();
-       } else {
-           throw new RuntimeException("There is no product with id: " + id);
-       }
-       return product;
     }
 }

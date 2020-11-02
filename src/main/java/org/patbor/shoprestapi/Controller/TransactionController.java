@@ -34,7 +34,6 @@ public class TransactionController {
                                  TransactionDetailsService transactionDetailsService,
                                  ProductService productService,
                                  UserService userService) {
-
         this.transactionService = transactionService;
         this.transactionDetailsService = transactionDetailsService;
         this.productService = productService;
@@ -43,7 +42,7 @@ public class TransactionController {
 
     @PostMapping("/shopping/{productId},{amount}")
     public void doShopping(@PathVariable int productId, @PathVariable int amount) {
-        orders.add(new Order(productService.findProductById(productId), amount));
+        orders.add(new Order(productService.findProductById(productId).getBody(), amount));
     }
 
     @GetMapping
@@ -53,7 +52,7 @@ public class TransactionController {
 
     @GetMapping("/shopping/price")
     public String priceOfTransaction() {
-        return "You have to paid: " + values().getValueBrutto().toString() +
+        return "You have to pay: " + values().getValueBrutto().toString() +
                 " \n If you want to finalize your transaction introduce endpoint /finalize ";
     }
 
@@ -94,17 +93,17 @@ public class TransactionController {
         return value;
     }
 
-//    @GetMapping("/find/{from},{to}")
-//    public List<Transaction> findTransaction(@PathVariable("from") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate from,
-//                                             @PathVariable("to") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate to) {
-//        return transactionService.findAllTransactionByDate(from, to);
-//    }
     @GetMapping("/find/{from},{to}")
-    public List<Transaction> findTransaction(@PathVariable String from,
-                                             @PathVariable String to) {
-        return transactionService.findAllTransactionByDate(dataFormatter(from),dataFormatter(to));
-
+    public List<Transaction> findTransaction(@PathVariable("from") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate from,
+                                             @PathVariable("to") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate to) {
+        return transactionService.findAllTransactionByDate(from, to);
     }
+//    @GetMapping("/find/{from},{to}")
+//    public List<Transaction> findTransaction(@PathVariable String from,
+//                                             @PathVariable String to) {
+//        return transactionService.findAllTransactionByDate(dataFormatter(from),dataFormatter(to));
+//
+//    }
 
     @GetMapping("/find/{from}")
     public List<Transaction> findTransaction(@PathVariable("from") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate from) {

@@ -34,7 +34,7 @@ public class TransactionService {
     public List<Transaction> findAllTransactionByDate(LocalDate from, LocalDate to) {
         return transactionRepository.findAll()
                 .stream()
-                .filter(data -> data.getDate().isBefore(from) && data.getDate().isAfter(to))
+                .filter(data -> data.getDate().isBefore(to) && data.getDate().isAfter(from))
                 .collect(Collectors.toList());
     }
 

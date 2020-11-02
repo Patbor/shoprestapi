@@ -1,6 +1,8 @@
 package org.patbor.shoprestapi.Service;
 
 import org.patbor.shoprestapi.Entity.User;
+import org.patbor.shoprestapi.Exceptions.AlreadyExistsException;
+import org.patbor.shoprestapi.Exceptions.NotFoundException;
 import org.patbor.shoprestapi.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,7 +22,7 @@ public class UserService {
 
     public void addUser(User user) {
         if (userRepository.findUserByEmail(user.getEmail()) != null)
-            throw new RuntimeException("This email has already existed, try with new");
+            throw new AlreadyExistsException("This email has already existed, try with new");
         else
             userRepository.save(user);
     }
@@ -31,7 +33,7 @@ public class UserService {
             User user = tempUser.get();
             userRepository.delete(user);
         } else {
-            throw new RuntimeException("Customer with id " + id + " doesn't exist");
+            throw new NotFoundException("Customer with id " + id + " doesn't exist");
         }
     }
 
@@ -45,7 +47,7 @@ public class UserService {
         if (OptUser.isPresent()) {
             user = OptUser.get();
         } else {
-            throw new RuntimeException("Customer with id " + id + " doesn't exist");
+            throw new NotFoundException("Customer with id " + id + " doesn't exist");
         }
         return user;
     }

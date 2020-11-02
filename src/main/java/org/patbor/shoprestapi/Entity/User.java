@@ -21,9 +21,9 @@ public class User {
     @Column(name = "user_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-
+    @Column(name = "first_name")
     private String firstName;
-
+    @Column(name = "last_name")
     private String lastName;
 
     private String email;
@@ -40,12 +40,11 @@ public class User {
 
 
     public void addTransaction(Transaction transaction) {
-        if (transactions == null)
+        if (transactions == null) {
             transactions = new ArrayList<>();
-
-        if (transaction != null)
+        } else {
             transactions.add(transaction);
-
+        }
         transaction.setUser(this);
     }
 }

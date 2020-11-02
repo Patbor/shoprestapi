@@ -14,6 +14,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
+@Table(name = "products")
 public class Product {
 
     @Id
@@ -37,4 +38,5 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = {CascadeType.MERGE,CascadeType.DETACH,CascadeType.REFRESH})
     @JsonIgnore
     private List<TransactionDetail> transactionDetails;
+
 }

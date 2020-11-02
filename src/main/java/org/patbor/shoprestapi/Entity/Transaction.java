@@ -18,6 +18,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
+@Table(name = "transations")
 public class Transaction {
 
     @Id
@@ -25,7 +26,7 @@ public class Transaction {
     @Column(name = "transaction_id")
     private int transactionID;
 
-    @ManyToOne(cascade = {CascadeType.PERSIST,CascadeType.MERGE,CascadeType.DETACH,CascadeType.REFRESH})
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
     @JoinColumn(name = "user_id")
     private User user;
 
@@ -41,7 +42,7 @@ public class Transaction {
 
     private LocalDate date;
 
-    public Transaction(User user, BigDecimal valueNetto, BigDecimal valueBrutto,LocalDate date ) {
+    public Transaction(User user, BigDecimal valueNetto, BigDecimal valueBrutto, LocalDate date) {
         this.user = user;
         this.valueNetto = valueNetto;
         this.valueBrutto = valueBrutto;
@@ -50,10 +51,9 @@ public class Transaction {
 
     public void addDetails(TransactionDetail transactionDetail) {
 
-        if(transactionDetails == null) {
+        if (transactionDetails == null) {
             transactionDetails = new ArrayList<>();
-        }
-        if(transactionDetail != null) {
+        } else {
             transactionDetails.add(transactionDetail);
         }
         transactionDetail.setTransaction(this);
