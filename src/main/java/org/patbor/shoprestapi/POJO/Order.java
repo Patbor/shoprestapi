@@ -16,4 +16,12 @@ public class Order {
         this.product = product;
         this.amount = amount;
     }
+
+    @Override
+    public String toString() {
+        return "Order{" +
+                "product=" + product +
+                ", amount=" + amount +
+                '}';
+    }
 }

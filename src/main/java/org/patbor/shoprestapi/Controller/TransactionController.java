@@ -3,6 +3,8 @@ package org.patbor.shoprestapi.Controller;
 import org.patbor.shoprestapi.Entity.Product;
 import org.patbor.shoprestapi.Entity.Transaction;
 import org.patbor.shoprestapi.Entity.TransactionDetail;
+import org.patbor.shoprestapi.Exceptions.MoneyException;
+import org.patbor.shoprestapi.Exceptions.NotFoundException;
 import org.patbor.shoprestapi.POJO.Order;
 import org.patbor.shoprestapi.POJO.Value;
 import org.patbor.shoprestapi.Service.ProductService;
@@ -12,6 +14,7 @@ import org.patbor.shoprestapi.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -27,7 +30,7 @@ public class TransactionController {
     private TransactionDetailsService transactionDetailsService;
     private ProductService productService;
     private UserService userService;
-    List<Order> orders = new ArrayList<>();
+    List<Order> ordersOnBasket = new ArrayList<>();
 
     @Autowired
     public TransactionController(TransactionService transactionService,
@@ -42,78 +45,36 @@ public class TransactionController {
 
     @PostMapping("/shopping/{productId},{amount}")
     public void doShopping(@PathVariable int productId, @PathVariable int amount) {
-        orders.add(new Order(productService.findProductById(productId).getBody(), amount));
+        ordersOnBasket.add(new Order(productService.findProductById(productId).getBody(), amount));
     }
 
-    @GetMapping
+    @GetMapping("/shopping/basket")
     public List<Order> showYourBasket() {
-        return orders;
+        return ordersOnBasket;
     }
 
     @GetMapping("/shopping/price")
     public String priceOfTransaction() {
-        return "You have to pay: " + values().getValueBrutto().toString() +
+        String bruttoPrice = transactionDetailsService.getFinalPriceOfOneTransaction(ordersOnBasket).getValueBrutto().toString();
+        return "You have to pay: " + bruttoPrice +
                 " \n If you want to finalize your transaction introduce endpoint /finalize ";
     }
 
     @PostMapping("/shopping/finalize/{userID}")
-    public void finalizeTransaction(@PathVariable int userID) {
-        Value value = values();
-        Transaction transaction = new Transaction(userService.findUserByID(userID),
-                value.getValueBrutto(),
-                value.getValueNetto(),
-                LocalDate.now());
-        transactionService.addTransaction(transaction);
-        for (Order order : orders) {
-            Product product = order.getProduct();
-            TransactionDetail transactionDetail = new TransactionDetail(product, order.getAmount(), product.getValueNetto(), product.getValueBrutto());
-
-            transaction.addDetails(transactionDetail);
-            transactionDetailsService.addTransactionDetail(transactionDetail);
-        }
+    public HttpStatus finalizeTransaction(@PathVariable int userID) {
+      return transactionDetailsService.addTransactionWithDetails(userID, ordersOnBasket);
     }
 
-    private Value values() {
-        Value value = new Value();
-
-        for (Order order : orders) {
-            BigDecimal actualValueBrutto = value.getValueBrutto();
-            BigDecimal actualValueNetto = value.getValueNetto();
-            int amount = order.getAmount();
-
-            value.setValueBrutto(actualValueBrutto
-                    .add((order.getProduct().getValueBrutto())
-                            .multiply(BigDecimal.valueOf(amount))));
-
-            value.setValueNetto(actualValueNetto
-                    .add((order.getProduct().getValueNetto()))
-                    .multiply(BigDecimal.valueOf(amount)));
-        }
-
-        return value;
-    }
-
-    @GetMapping("/find/{from},{to}")
-    public List<Transaction> findTransaction(@PathVariable("from") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate from,
-                                             @PathVariable("to") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate to) {
-        return transactionService.findAllTransactionByDate(from, to);
-    }
-//    @GetMapping("/find/{from},{to}")
-//    public List<Transaction> findTransaction(@PathVariable String from,
-//                                             @PathVariable String to) {
-//        return transactionService.findAllTransactionByDate(dataFormatter(from),dataFormatter(to));
+//    @PostMapping("/find/{from},{to}")
+//    public List<Transaction> findTransaction(@PathVariable("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate from,
+//                                             @PathVariable("to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate to) {
+//
+//        return transactionService.findAllTransactionByDate(from, to);
+//    }
+//
+//    @GetMapping("/find/{from}")
+//    public void findTransaction(@PathVariable("from") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate from) {
+//        // return transactionService.findAllTransactionByDate(from);
 //
 //    }
-
-    @GetMapping("/find/{from}")
-    public List<Transaction> findTransaction(@PathVariable("from") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate from) {
-        return transactionService.findAllTransactionByDate(from);
-
-    }
-
-    private LocalDate dataFormatter(String date) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDate localDate = LocalDate.parse(date, formatter);
-        return localDate;
-    }
 }

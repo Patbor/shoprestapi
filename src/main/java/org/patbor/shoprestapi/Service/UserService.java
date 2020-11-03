@@ -7,6 +7,7 @@ import org.patbor.shoprestapi.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,11 +38,16 @@ public class UserService {
         }
     }
 
+    public BigDecimal getAccountBalance(int id) {
+        return userRepository.checkAccountBalance(id);
+    }
+
     public List<User> findAll() {
         return userRepository.findAll();
     }
 
     public User findUserByID(int id) {
+
         Optional<User> OptUser = userRepository.findById(id);
         User user;
         if (OptUser.isPresent()) {
@@ -50,5 +56,9 @@ public class UserService {
             throw new NotFoundException("Customer with id " + id + " doesn't exist");
         }
         return user;
+    }
+
+    public void upgradeAccountBalance(int userID, BigDecimal accountBalance) {
+       userRepository.upgradeAccountBalance(accountBalance,userID);
     }
 }
