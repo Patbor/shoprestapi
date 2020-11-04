@@ -1,25 +1,15 @@
 package org.patbor.shoprestapi.Controller;
 
-import org.patbor.shoprestapi.Entity.Product;
-import org.patbor.shoprestapi.Entity.Transaction;
-import org.patbor.shoprestapi.Entity.TransactionDetail;
-import org.patbor.shoprestapi.Exceptions.MoneyException;
-import org.patbor.shoprestapi.Exceptions.NotFoundException;
 import org.patbor.shoprestapi.POJO.Order;
-import org.patbor.shoprestapi.POJO.Value;
 import org.patbor.shoprestapi.Service.ProductService;
 import org.patbor.shoprestapi.Service.TransactionDetailsService;
 import org.patbor.shoprestapi.Service.TransactionService;
 import org.patbor.shoprestapi.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +20,7 @@ public class TransactionController {
     private TransactionDetailsService transactionDetailsService;
     private ProductService productService;
     private UserService userService;
-    List<Order> ordersOnBasket = new ArrayList<>();
+    List<Order> ordersInBasket = new ArrayList<>();
 
     @Autowired
     public TransactionController(TransactionService transactionService,
@@ -45,24 +35,24 @@ public class TransactionController {
 
     @PostMapping("/shopping/{productId},{amount}")
     public void doShopping(@PathVariable int productId, @PathVariable int amount) {
-        ordersOnBasket.add(new Order(productService.findProductById(productId).getBody(), amount));
+        ordersInBasket.add(new Order(productService.findProductById(productId).getBody(), amount));
     }
 
     @GetMapping("/shopping/basket")
     public List<Order> showYourBasket() {
-        return ordersOnBasket;
+        return ordersInBasket;
     }
 
     @GetMapping("/shopping/price")
     public String priceOfTransaction() {
-        String bruttoPrice = transactionDetailsService.getFinalPriceOfOneTransaction(ordersOnBasket).getValueBrutto().toString();
+        String bruttoPrice = transactionDetailsService.getFinalPriceOfOneTransaction(ordersInBasket).getValueBrutto().toString();
         return "You have to pay: " + bruttoPrice +
                 " \n If you want to finalize your transaction introduce endpoint /finalize ";
     }
 
     @PostMapping("/shopping/finalize/{userID}")
     public HttpStatus finalizeTransaction(@PathVariable int userID) {
-      return transactionDetailsService.addTransactionWithDetails(userID, ordersOnBasket);
+      return transactionDetailsService.addTransactionWithDetails(userID, ordersInBasket);
     }
 
 //    @PostMapping("/find/{from},{to}")

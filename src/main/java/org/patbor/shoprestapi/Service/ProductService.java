@@ -27,6 +27,7 @@ public class ProductService {
             throw new AlreadyExistsException("Product has already existed");
         }
         else {
+
             return new ResponseEntity<>(productRepository.save(product), HttpStatus.OK);
         }
     }
@@ -41,6 +42,7 @@ public class ProductService {
         if (product == null) {
             throw new NotFoundException("A product with name " + name + " doesn't exist");
         } else {
+
             return new ResponseEntity<>(product, HttpStatus.OK);
         }
     }
@@ -53,6 +55,7 @@ public class ProductService {
         } else {
             throw new NotFoundException("There is no product with id: " + id);
         }
+
         return new ResponseEntity<>(product, HttpStatus.OK);
     }
 
@@ -61,6 +64,12 @@ public class ProductService {
         String correctlyName = name.replace(name.charAt(0), firstLetter.toCharArray()[0]);
 
         return correctlyName;
+    }
+    public int getAmountOfProduct(String name) {
+       return productRepository.getAmount(name);
+    }
 
+    public void uptadeAmountOfProducts(String name, int amount) {
+        productRepository.updateAmount(amount, name);
     }
 }

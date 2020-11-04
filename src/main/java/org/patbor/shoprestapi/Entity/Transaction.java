@@ -53,8 +53,6 @@ public class Transaction {
 
         if (transactionDetails == null) {
             transactionDetails = new ArrayList<>();
-        } else {
-            transactionDetails.add(transactionDetail);
         }
         transactionDetail.setTransaction(this);
     }

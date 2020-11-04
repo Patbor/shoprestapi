@@ -22,14 +22,18 @@ public class TransactionDetailsService {
     private TransactionDetailsRepository transactionDetailsRepository;
     private TransactionService transactionService;
     private UserService userService;
+    private ProductService productService;
+
 
     @Autowired
     public TransactionDetailsService(TransactionDetailsRepository transactionDetailsRepository,
                                      TransactionService transactionService,
-                                     UserService userService) {
+                                     UserService userService,
+                                     ProductService productService) {
         this.transactionDetailsRepository = transactionDetailsRepository;
         this.transactionService = transactionService;
         this.userService = userService;
+        this.productService = productService;
     }
 
     private void addTransactionDetail(TransactionDetail transactionDetail) {
@@ -49,7 +53,7 @@ public class TransactionDetailsService {
                                 .multiply(BigDecimal.valueOf(amount))));
                 value.setValueNetto(actualValueNetto
                         .add((order.getProduct().getValueNetto())
-                        .multiply(BigDecimal.valueOf(amount))));
+                                .multiply(BigDecimal.valueOf(amount))));
             } else {
                 throw new NotFoundException("The basket is propably empty");
             }
@@ -62,20 +66,27 @@ public class TransactionDetailsService {
         Value priceOfOneTransaction = getFinalPriceOfOneTransaction(ordersOnBasket);
         BigDecimal valueBruttoOfTransaction = priceOfOneTransaction.getValueBrutto();
         Transaction transaction = new Transaction(userService.findUserByID(userID),
-                valueBruttoOfTransaction,
                 priceOfOneTransaction.getValueNetto(),
+                valueBruttoOfTransaction,
                 LocalDate.now());
         for (Order order : ordersOnBasket) {
-            if (order != null) {
+            if (order == null) {
+                throw new NotFoundException("Basket is empty");
+            }
                 Product product = order.getProduct();
-                TransactionDetail transactionDetail = new TransactionDetail(product, order.getAmount(), product.getValueNetto(), product.getValueBrutto());
+                int amountOfProduct = order.getAmount();
+                int finalAmount = productService.getAmountOfProduct(product.getName()) - amountOfProduct;
+                BigDecimal totalSumNettoProductOnTransaction = product.getValueNetto().multiply(BigDecimal.valueOf(amountOfProduct));
+                BigDecimal totalSumBruttoProductOnTransaction = product.getValueBrutto().multiply(BigDecimal.valueOf(amountOfProduct));
+                TransactionDetail transactionDetail = new TransactionDetail(product,
+                        amountOfProduct,
+                        totalSumNettoProductOnTransaction,
+                        totalSumBruttoProductOnTransaction);
                 getMoneyFromAccount(userID, accountBalance.subtract(valueBruttoOfTransaction));
                 transaction.addDetails(transactionDetail);
                 transactionService.addTransaction(transaction);
                 addTransactionDetail(transactionDetail);
-            } else {
-                throw new NotFoundException("Basket is empty");
-            }
+                productService.uptadeAmountOfProducts(product.getName(), finalAmount);
         }
         ordersOnBasket.clear();
 
@@ -86,7 +97,7 @@ public class TransactionDetailsService {
         Value priceOfOneTransaction = getFinalPriceOfOneTransaction(ordersOnBasket);
         BigDecimal accountBalance = userService.getAccountBalance(userID);
         int checkIfTransactionIsPossible = accountBalance.compareTo(priceOfOneTransaction.getValueBrutto());
-        if (checkIfTransactionIsPossible == 1 || checkIfTransactionIsPossible == 0) {
+        if (checkIfTransactionIsPossible >= 0) {
             completionOfTransaction(userID, ordersOnBasket, accountBalance);
 
             return HttpStatus.ACCEPTED;
